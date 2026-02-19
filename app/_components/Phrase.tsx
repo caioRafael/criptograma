@@ -29,8 +29,8 @@ export function Phrase() {
     return(
         <div className="flex items-center justify-center gap-5 flex-wrap">
         {words.map((word, index) => (
-          <div key={word} className="flex flex-row gap-0.5 flex-wrap">
-            <Word word={word} letterIndexes={getLetterIndexes(index)} />
+          <div key={word + index} className="flex flex-row gap-0.5 flex-wrap">
+            <Word word={word} wordIndex={index} letterIndexes={getLetterIndexes(index)} />
             {/* <WhiteSpace/> */}
           </div>
         ))}

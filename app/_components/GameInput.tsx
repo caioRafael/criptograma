@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { useGame } from "../hooks/useGame"
 
-export function GameInput({ letter, visible }: { letter: string, visible: boolean }) {
-    const { leterKeys, letterValues, setLetterValue } = useGame()
+export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter: string, visible: boolean, wordIndex: number, letterIndex: number }) {
+    const { leterKeys, letterValues, setLetterValue, setLetterStatus, letterStatuses } = useGame()
     // Se está visível (revelada no início), mostra a letra
     // Se não está visível mas foi preenchida pelo usuário, mostra o valor preenchido
     const value = visible ? letter : (letterValues[letter] || '')
@@ -21,6 +21,15 @@ export function GameInput({ letter, visible }: { letter: string, visible: boolea
             setInputStatus('incorrect')
         }
     }, [value, letter, visible])
+
+    useEffect(() => {
+        // notifica o contexto sobre o status desta posição apenas se diferente do atual
+        if (!setLetterStatus) return
+        const posKey = `${wordIndex}-${letterIndex}`
+        const current = letterStatuses?.[posKey]
+        if (current === inputStatus) return
+        setLetterStatus(posKey, inputStatus)
+    }, [inputStatus, letter, setLetterStatus, letterStatuses, wordIndex, letterIndex])
 
     return (
       <div className="flex flex-col items-center justify-center gap-1.5">
@@ -47,8 +56,8 @@ export function GameInput({ letter, visible }: { letter: string, visible: boolea
             `}
             value={value}
             onKeyDown={(e) => {
-                // Se uma letra foi digitada, substitui diretamente o valor
-                if (e.key.length === 1 && /[A-Za-z]/.test(e.key)) {
+                // Se uma letra foi digitada (inclui letras Unicode), substitui diretamente o valor
+                if (e.key.length === 1 && /\p{L}/u.test(e.key)) {
                     e.preventDefault()
                     setLetterValue(letter, e.key.toUpperCase())
                 }

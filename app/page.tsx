@@ -1,80 +1,111 @@
-'use client'
-
-import { useState, useEffect } from "react";
-import { Phrase } from "./_components/Phrase";
-import { GameProvider } from "./context/GameContext";
-import { useGame } from "./hooks/useGame";
-import { NextPhaseButton } from "./_components/NextPhaseButton";
-
-const PHRASES = [
-  "O CARRO VERMELHO FEZ UM GIRO!",
-  "BADA BADA BUM",
-]
-
-function GameContent({ onNextPhase, isLastPhase }: { onNextPhase: () => void, isLastPhase: boolean }) {
-  const { isPhraseComplete, letterValues, phrase } = useGame()
-  const [showNextButton, setShowNextButton] = useState(false)
-
-  useEffect(() => {
-    // Verifica se a frase está completa sempre que os valores mudarem
-    const checkComplete = () => {
-      const words = phrase.split(' ')
-      let allComplete = true
-      
-      for (const word of words) {
-        for (let i = 0; i < word.length; i++) {
-          const letter = word[i]
-          const value = letterValues[letter]
-          if (!value || value !== letter) {
-            allComplete = false
-            break
-          }
-        }
-        if (!allComplete) break
-      }
-      
-      setShowNextButton(allComplete)
-    }
-    
-    checkComplete()
-  }, [letterValues, phrase])
-
-  return (
-    <>
-      <Phrase />
-      {showNextButton && <NextPhaseButton onNextPhase={onNextPhase} isLastPhase={isLastPhase} />}
-    </>
-  )
-}
+import GameClient from "./GameClient";
 
 export default function Home() {
-  const [currentPhase, setCurrentPhase] = useState(0)
-  const [phrase, setPhrase] = useState(PHRASES[currentPhase])
-
-  const handleNextPhase = () => {
-    if (currentPhase < PHRASES.length - 1) {
-      const nextPhase = currentPhase + 1
-      setCurrentPhase(nextPhase)
-      setPhrase(PHRASES[nextPhase])
-    }
-  }
-
   return (
-    <GameProvider phrase={phrase} key={currentPhase}>
-      <div className="flex flex-col gap-6 min-h-screen items-center justify-center bg-gradient-to-br from-purple-100 via-purple-50 to-white py-8">
-        <div className="text-center mb-4">
-          <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-purple-400 to-purple-300 mb-2 drop-shadow-lg">
-            Criptograma
-          </h1>
-          <p className="text-gray-600 text-lg font-medium">
-            Decifre a mensagem secreta
-          </p>
-          <p className="text-purple-500 text-sm font-semibold mt-2">
-            Fase {currentPhase + 1} de {PHRASES.length}
-          </p>
-        </div>
-        <GameContent onNextPhase={handleNextPhase} isLastPhase={currentPhase === PHRASES.length - 1} />
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-purple-50 to-white py-8">
+      <div className="w-full max-w-4xl px-4">
+        <GameClient phrases={FRASES_FAMOSAS_BR} />
       </div>
-    </GameProvider>
+    </main>
   );
 }
+
+export const FRASES_FAMOSAS_BR: string[] = [
+  "QUE PAIS E ESTE",
+  "O TEMPO NAO PARA",
+  "DIAS DE LUTA DIAS DE GLORIA",
+  "ANDAR COM FE EU VOU QUE A FE NAO COSTUMA FALHAR",
+  "E PRECISO SABER VIVER",
+  "NAO QUERO DINHEIRO EU SO QUERO AMAR",
+  "COMO UMA ONDA NO MAR",
+  "MEU CORACAO NAO SE CANSA DE TER ESPERANCA",
+  "A VIDA E DESAFIO",
+  "EU SEI QUE VOU TE AMAR POR TODA A MINHA VIDA",
+  "OLHA QUE COISA MAIS LINDA MAIS CHEIA DE GRACA",
+  "TODO CAMBURAO TEM UM POUCO DE NAVIO NEGREIRO",
+  "NINGUEM SOLTA A MAO DE NINGUEM",
+  "BRASIL MOSTRA A TUA CARA",
+  "NO MEIO DO CAMINHO TINHA UMA PEDRA",
+  "O AMOR E FOGO QUE ARDE SEM SE VER",
+  "LIBERDADE AINDA QUE TARDIA",
+  "PAI AFASTA DE MIM ESSE CALESE",
+  "ALEGRIA ALEGRIA",
+  "PRA NAO DIZER QUE NAO FALEI DAS FLORES",
+  "O BEBADO E A EQUILIBRISTA",
+  "O MUNDO E UM MOINHO",
+  "AS ROSAS NAO FALAM",
+  "AMIGO E COISA PRA SE GUARDAR DO LADO ESQUERDO DO PEITO",
+  "SOMOS QUEM PODEMOS SER SONHOS QUE PODEMOS TER",
+  "QUANDO NAO HOUVER SAIDA QUANDO NAO HOUVER MAIS SOLUCAO",
+  "QUEM ACREDITA SEMPRE ALCANCA",
+  "A VIDA E ARTE DO ENCONTRO EMBORA HAJA TANTO DESENCONTRO PELA VIDA",
+  "O QUE E O QUE E CLARO QUE E",
+  "EU PREFIRO SER ESSA METAMORFOSE AMBULANTE",
+  "TENTE OUTRA VEZ",
+  "CADA UM SABE A DOR E A DELICIA DE SER O QUE E",
+  "DEIXA A VIDA ME LEVAR VIDA LEVA EU",
+  "ENQUANTO HOUVER SOL AINDA HAVERA",
+  "NAO DEIXE O SAMBA MORRER",
+  "A FELICIDADE E COMO A PLUMA QUE O VENTO VAI LEVANDO PELO AR",
+  "AGUAS DE MARCO FECHANDO O VERAO",
+  "ERA UM GAROTO QUE COMO EU AMAVA OS BEATLES E OS ROLLING STONES",
+  "E TAO BONITO QUANDO A GENTE ENTENDE",
+  "O AMANHA NAO ESTA A VENDA",
+  "SE CHOREI OU SE SORRI O IMPORTANTE E QUE EMOCOES EU VIVI",
+  "EU SO QUERO UM AMOR QUE ACABE O MEU SOFRER",
+  "QUANDO A CHUVA PASSAR QUANDO O TEMPO ABRIR",
+  "VIVER E NAO TER A VERGONHA DE SER FELIZ",
+  "O SOL NASCER PARA TODOS E A SOMBRA PARA QUEM MERECE",
+  "NADA DO QUE FOI SERA DE NOVO DO JEITO QUE JA FOI UM DIA",
+  "O QUE NAO ME MATA ME FORTALECE",
+  "HA TEMPOS QUE NAO FAZIA SENTIDO",
+  "MEU AMOR OLHA SO HOJE O SOL NAO APARECEU",
+  "QUEM SABE FAZ A HORA NAO ESPERA ACONTECER",
+  "A GENTE NAO QUER SO COMIDA A GENTE QUER COMIDA DIVERSAO E ARTE",
+  "EU NASCI HA DEZ MIL ANOS ATRAS",
+  "MINHA DOR E PERCEBER QUE APESAR DE TERMOS FEITO TUDO O QUE FIZEMOS",
+  "SO SEI QUE NADA SEI",
+  "A ESPERANCA E A ULTIMA QUE MORRE",
+  "DE TANTO LEVAR FRECHADA DO TEU OLHAR",
+  "EU QUERO A SORTE DE UM AMOR TRANQUILO",
+  "QUANDO O SEGUNDO SOL CHEGAR",
+  "O TEMPO E O SENHOR DA RAZAO",
+  "E PROIBIDO PROIBIR",
+  "O BRASIL NAO CONHECE O BRASIL",
+  "QUEM NAO TEM CAO CACA COM GATO",
+  "A UNIAO FAZ A FORCA",
+  "DEUS AJUDA QUEM CEDO MADRUGA",
+  "AGUA MOLE EM PEDRA DURA TANTO BATE ATE QUE FURA",
+  "ANTES TARDE DO QUE NUNCA",
+  "CADA MACACO NO SEU GALHO",
+  "EM TERRA DE CEGO QUEM TEM UM OLHO E REI",
+  "FILHO DE PEIXE PEIXINHO E",
+  "GATO ESCALDADO TEM MEDO DE AGUA FRIA",
+  "MENTIRA TEM PERNA CURTA",
+  "QUEM COM FERRO FERE COM FERRO SERA FERIDO",
+  "QUEM ESPERA SEMPRE ALCANCA",
+  "SANTO DE CASA NAO FAZ MILAGRE",
+  "QUEM CANTA SEUS MALES ESPANTA",
+  "DE GRAO EM GRAO A GALINHA ENCHE O PAPO",
+  "O APRESSADO COME CRU",
+  "A PRESSA E INIMIGA DA PERFEICAO",
+  "NAO HA MAL QUE DURE PARA SEMPRE",
+  "O QUE OS OLHOS NAO VEEM O CORACAO NAO SENTE",
+  "CADA CASO E UM CASO",
+  "O BARATO E LOUCO E O PROCESSO E LENTO",
+  "O AMOR NAO TEM LEI",
+  "TUDO VALE A PENA SE A ALMA NAO E PEQUENA",
+  "EU SEI QUE A VIDA DEVIA SER BEM MELHOR E SERA",
+  "HOJE E UM NOVO DIA DE UM NOVO TEMPO QUE COMEOU",
+  "NAO EXISTE PECADO DO LADO DE BAIXO DO EQUADOR",
+  "EU SO PECO A DEUS UM POUCO DE MALDADE",
+  "VEM VAMOS EMBORA QUE ESPERAR NAO E SABER",
+  "NINGUEM E IGUAL A NINGUEM",
+  "O IMPORTANTE E SER VERDADEIRO",
+  "O AMOR E PACIENTE O AMOR E BONDOSO",
+  "TUDO PASSA TUDO SEMPRE PASSARA",
+  "QUEM TEM BOCA VAI A ROMA",
+  "QUEM NAO ARRISCA NAO PETISCA",
+  "QUEM NAO CHORA NAO MAMA",
+  "A VIDA CONTINUA"
+]

@@ -9,7 +9,12 @@ interface GameContextType {
     getRandomLetters: () => Array<[number, number]>
     letterValues: Record<string, string>
     setLetterValue: (letter: string, value: string) => void
+    letterStatuses: Record<string, 'correct' | 'incorrect' | 'default'>
+    setLetterStatus: (letter: string, status: 'correct' | 'incorrect' | 'default') => void
+    areAllInputsCorrect: () => boolean
     isPhraseComplete: () => boolean
+    getTypedPhrase: () => string
+    isTypedPhraseEqual: () => boolean
 }
 
 interface GameProviderProps {
@@ -22,6 +27,7 @@ export function GameProvider({ children, phrase }: GameProviderProps) {
     const [leterKeys, setLetterKeys] = useState<Record<string, { index: number | string, value: string }>>({})
     const [randomLetters, setRandomLetters] = useState<Array<[number, number]>>([])
     const [letterValues, setLetterValues] = useState<Record<string, string>>({})
+    const [letterStatuses, setLetterStatuses] = useState<Record<string, 'correct' | 'incorrect' | 'default'>>({})
 
     const setLetterValue = (letter: string, value: string) => {
         setLetterValues(prev => ({
@@ -29,16 +35,100 @@ export function GameProvider({ children, phrase }: GameProviderProps) {
             [letter]: value
         }))
     }
+    
+    const setLetterStatus = (letter: string, status: 'correct' | 'incorrect' | 'default') => {
+        setLetterStatuses(prev => {
+            // Evita atualizar o estado se o status não mudou (prevenção de loop de render)
+            if (prev[letter] === status) return prev
+            return {
+                ...prev,
+                [letter]: status
+            }
+        })
+    }
 
     const isPhraseComplete = (): boolean => {
         const words = phrase.split(' ')
         for (const word of words) {
             for (let i = 0; i < word.length; i++) {
                 const letter = word[i]
+                // considera caracteres que não sejam letras/números Unicode (pontuação/espaços) como já corretos
+                if (!/[\p{L}\p{N}]/u.test(letter)) {
+                    continue
+                }
                 const value = letterValues[letter]
                 if (!value || value !== letter) {
                     return false
                 }
+            }
+        }
+        return true
+    }
+
+    const getTypedPhrase = (): string => {
+        // Constrói a frase atual com base nos valores digitados para cada caractere da frase original.
+        // Mantém o mesmo tamanho da frase usando um placeholder para posições não preenchidas,
+        // isso permite comparar por posição exata posteriormente.
+        const PLACEHOLDER = '\u0000'
+        return phrase
+            .split('')
+            .map((ch) => {
+            if (!/[\p{L}\p{N}]/u.test(ch)) return ch
+                const v = letterValues[ch]
+                return v ? v : PLACEHOLDER
+            })
+            .join('')
+    }
+
+    const isTypedPhraseEqual = (): boolean => {
+        const typed = getTypedPhrase()
+        // logs para debug
+        console.log("[isTypedPhraseEqual] phrase:", JSON.stringify(phrase))
+        console.log("[isTypedPhraseEqual] typed :", JSON.stringify(typed))
+        console.log("[isTypedPhraseEqual] letterValues:", letterValues)
+
+        if (typed.length !== phrase.length) {
+            console.log("[isTypedPhraseEqual] length mismatch", typed.length, phrase.length)
+            return false
+        }
+
+        const PLACEHOLDER = '\u0000'
+
+        for (let i = 0; i < phrase.length; i++) {
+            const original = phrase[i]
+            const typedChar = typed[i]
+            if (!/[\p{L}\p{N}]/u.test(original)) {
+                if (typedChar !== original) {
+                    console.log("[isTypedPhraseEqual] non-alnum mismatch at", i, original, typedChar)
+                    return false
+                }
+                continue
+            }
+            if (typedChar === PLACEHOLDER) {
+                console.log("[isTypedPhraseEqual] placeholder at", i)
+                return false
+            }
+            if (typedChar !== original) {
+                console.log("[isTypedPhraseEqual] char mismatch at", i, original, typedChar)
+                return false
+            }
+        }
+        console.log("[isTypedPhraseEqual] exact match -> true")
+        return true
+    }
+
+    const areAllInputsCorrect = (): boolean => {
+        // Verifica o status das posições informado pelos componentes GameInput.
+        // Considera caracteres que não sejam letras/números Unicode (pontuação/espaços) como já corretos.
+        const words = phrase.split(' ')
+        for (let w = 0; w < words.length; w++) {
+            const word = words[w]
+            for (let i = 0; i < word.length; i++) {
+                const ch = word[i]
+                if (!/[\p{L}\p{N}]/u.test(ch)) continue
+                const key = `${w}-${i}`
+                const status = letterStatuses[key]
+                if (status !== 'correct') return false
             }
         }
         return true
@@ -133,7 +223,20 @@ export function GameProvider({ children, phrase }: GameProviderProps) {
     }, [phrase])
 
     return (
-        <GameContext.Provider value={{ phrase, leterKeys, randomLetters, getRandomLetters, letterValues, setLetterValue, isPhraseComplete }}>
+        <GameContext.Provider value={{
+            phrase,
+            leterKeys,
+            randomLetters,
+            getRandomLetters,
+            letterValues,
+            setLetterValue,
+            letterStatuses,
+            setLetterStatus,
+            areAllInputsCorrect,
+            isPhraseComplete,
+            getTypedPhrase,
+            isTypedPhraseEqual
+        }}>
             {children}
         </GameContext.Provider>
     )}
