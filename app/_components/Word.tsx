@@ -10,7 +10,7 @@ export function Word({ word, wordIndex, letterIndexes = [] }: WordProps) {
   const characters = word.split("");
 
   return (
-    <div className="flex flex-row gap-0.5 flex-nowrap">
+    <div className="flex flex-row gap-0.5 flex-wrap">
       {characters.map((character, index) => (
         <GameInput
           key={index}

@@ -48,9 +48,9 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
             autoComplete="off"
             enterKeyHint="done"
             className={`
-                w-12 h-12 
-                text-center 
-                text-xl font-bold
+                w-10 h-10 sm:w-12 sm:h-12
+                text-center
+                text-lg sm:text-xl font-bold
                 rounded-lg
                 border-2
                 transition-all duration-200
