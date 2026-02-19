@@ -7,6 +7,8 @@ interface GameContextType {
     leterKeys: Record<string, { index: number | string, value: string }>
     randomLetters: Array<[number, number]>
     getRandomLetters: () => Array<[number, number]>
+    helpRemaining: number
+    revealRandomLetter: () => boolean
     letterValues: Record<string, string>
     setLetterValue: (letter: string, value: string) => void
     letterStatuses: Record<string, 'correct' | 'incorrect' | 'default'>
@@ -28,6 +30,7 @@ export function GameProvider({ children, phrase }: GameProviderProps) {
     const [randomLetters, setRandomLetters] = useState<Array<[number, number]>>([])
     const [letterValues, setLetterValues] = useState<Record<string, string>>({})
     const [letterStatuses, setLetterStatuses] = useState<Record<string, 'correct' | 'incorrect' | 'default'>>({})
+    const [helpRemaining, setHelpRemaining] = useState<number>(2)
 
     const setLetterValue = (letter: string, value: string) => {
         setLetterValues(prev => ({
@@ -222,6 +225,38 @@ export function GameProvider({ children, phrase }: GameProviderProps) {
         setLetterValues({})
     }, [phrase])
 
+    // reseta o contador de ajudas a cada mudança de frase
+    useEffect(() => {
+        setHelpRemaining(2)
+    }, [phrase])
+
+    const revealRandomLetter = (): boolean => {
+        // seleciona letras alfanuméricas que ainda não foram reveladas/escritas corretamente
+        try {
+            const uniqueLetters = Array.from(new Set(phrase.replace(/\s+/g, '').split('')))
+                .filter(ch => /[\p{L}\p{N}]/u.test(ch))
+
+            // letras já reveladas pelo sorteio inicial (randomLetters) — essas não devem ser escolhidas
+            const words = phrase.split(' ')
+            const revealedByRandom = new Set(
+                randomLetters
+                    .map(([w, l]) => words[w]?.[l])
+                    .filter(Boolean)
+            )
+
+            const unrevealed = uniqueLetters.filter(ch => letterValues[ch] !== ch && !revealedByRandom.has(ch))
+            if (unrevealed.length === 0) return false
+            if (helpRemaining <= 0) return false
+            const pick = unrevealed[Math.floor(Math.random() * unrevealed.length)]
+            // preenche todas as ocorrências desta letra
+            setLetterValues(prev => ({ ...prev, [pick]: pick }))
+            setHelpRemaining(h => Math.max(0, h - 1))
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
     return (
         <GameContext.Provider value={{
             phrase,
@@ -230,6 +265,8 @@ export function GameProvider({ children, phrase }: GameProviderProps) {
             getRandomLetters,
             letterValues,
             setLetterValue,
+            helpRemaining,
+            revealRandomLetter,
             letterStatuses,
             setLetterStatus,
             areAllInputsCorrect,

@@ -9,7 +9,7 @@ import { RulesModal } from "./_components/RulesModal";
 import { useGame } from "./hooks/useGame";
 
 function GameInner({ onNextPhase, isLastPhase }: { onNextPhase: () => void; isLastPhase: boolean }) {
-  const { isPhraseComplete, isTypedPhraseEqual, areAllInputsCorrect, letterStatuses } = useGame();
+  const { isPhraseComplete, isTypedPhraseEqual, areAllInputsCorrect, letterStatuses, revealRandomLetter, helpRemaining } = useGame();
   const [showNextButton, setShowNextButton] = useState(false);
 
   useEffect(() => {
@@ -21,6 +21,23 @@ function GameInner({ onNextPhase, isLastPhase }: { onNextPhase: () => void; isLa
 
   return (
     <>
+      <div className="w-full flex items-center justify-center">
+        <div className="w-full max-w-4xl px-2 flex justify-end">
+          <button
+            onClick={() => {
+              if (helpRemaining <= 0) return
+              const ok = revealRandomLetter()
+              if (!ok) {
+                // nothing
+              }
+            }}
+            disabled={helpRemaining <= 0}
+            className="px-3 py-2 mr-2 bg-white/90 border border-yellow-300 text-yellow-700 rounded-lg shadow-sm hover:bg-white transition disabled:opacity-50"
+          >
+            Ajuda ({helpRemaining})
+          </button>
+        </div>
+      </div>
       <Phrase />
       <Modal open={showNextButton} closeOnBackdrop={false}>
         <NextPhaseButton

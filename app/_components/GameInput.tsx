@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useGame } from "../hooks/useGame"
 
 export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter: string, visible: boolean, wordIndex: number, letterIndex: number }) {
@@ -30,6 +30,38 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
         }
     }, [value, letter, visible])
 
+    const inputRef = useRef<HTMLInputElement | null>(null)
+
+    const focusNextUnfilled = () => {
+        try {
+            const all = Array.from(document.querySelectorAll('input[data-word][data-letter]')) as HTMLInputElement[]
+            const sorted = all
+                .map(el => ({
+                    el,
+                    w: Number(el.dataset.word),
+                    l: Number(el.dataset.letter)
+                }))
+                .sort((a, b) => a.w - b.w || a.l - b.l)
+
+            const currentIndex = sorted.findIndex(s => s.w === wordIndex && s.l === letterIndex)
+            if (currentIndex === -1) return
+
+            for (let i = currentIndex + 1; i < sorted.length; i++) {
+                const candidate = sorted[i].el
+                const posKey = `${sorted[i].w}-${sorted[i].l}`
+                const status = letterStatuses?.[posKey]
+                // pula se já estiver marcado como correto ou o input estiver desabilitado
+                if (status === 'correct') continue
+                if (candidate.disabled) continue
+                candidate.focus()
+                candidate.select?.()
+                return
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
     useEffect(() => {
         // notifica o contexto sobre o status desta posição apenas se diferente do atual
         if (!setLetterStatus) return
@@ -47,6 +79,9 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
             inputMode="text"
             autoComplete="off"
             enterKeyHint="done"
+            ref={inputRef}
+            data-word={wordIndex}
+            data-letter={letterIndex}
             className={`
                 w-10 h-10 sm:w-12 sm:h-12
                 text-center
@@ -70,7 +105,13 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
                 // Se uma letra foi digitada (inclui letras Unicode), substitui diretamente o valor
                 if (e.key.length === 1 && /\p{L}/u.test(e.key)) {
                     e.preventDefault()
-                    setLetterValue(letter, e.key.toUpperCase())
+                    const char = e.key.toUpperCase()
+                    setLetterValue(letter, char)
+                    // Se acertou, tenta focar próxima posição não preenchida/errada
+                    if (char === letter) {
+                        // dá um pequeno delay para que o estado se propague e o DOM reflita o novo status
+                        setTimeout(() => focusNextUnfilled(), 40)
+                    }
                 }
                 // Permite Backspace e Delete para apagar
                 if (e.key === 'Backspace' || e.key === 'Delete') {
@@ -81,6 +122,9 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
                 // Fallback para outros métodos de entrada (colar, etc)
                 const newValue = e.target.value.toUpperCase().slice(-1)
                 setLetterValue(letter, newValue)
+                if (newValue === letter) {
+                    setTimeout(() => focusNextUnfilled(), 40)
+                }
             }}
             onFocus={(e) => {
                 // Seleciona o texto quando o campo recebe foco para facilitar substituição
