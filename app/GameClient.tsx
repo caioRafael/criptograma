@@ -81,7 +81,7 @@ export default function GameClient({ phrases }: { phrases: string[] }) {
   return (
     <GameProvider phrase={phrase} key={currentPhase}>
       <div className="relative flex flex-col gap-6 items-center justify-center">
-        <div className="absolute top-4 right-4 z-50">
+        <div className="w-full md:absolute md:top-4 md:right-4 z-50 flex justify-end">
           <button
             onClick={() => setShowRules(true)}
             className="px-3 py-2 bg-white/90 border border-purple-300 text-purple-700 rounded-lg shadow-sm hover:bg-white transition"
@@ -89,12 +89,12 @@ export default function GameClient({ phrases }: { phrases: string[] }) {
             Dúvidas
           </button>
         </div>
-        <div className="text-center mb-4">
-          <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-purple-400 to-purple-300 mb-2 drop-shadow-lg">
+        <div className="text-center mb-4 px-2">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-purple-400 to-purple-300 mb-2 drop-shadow-lg">
             Criptograma
           </h1>
-          <p className="text-gray-600 text-lg font-medium">Decifre a mensagem secreta</p>
-          <p className="text-purple-500 text-sm font-semibold mt-2">
+          <p className="text-gray-600 text-base sm:text-lg font-medium">Decifre a mensagem secreta</p>
+          <p className="text-purple-500 text-sm sm:text-base font-semibold mt-2">
             Fase {currentPhase + 1} de {phrases.length}
           </p>
         </div>

@@ -2,8 +2,8 @@ import GameClient from "./GameClient";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-purple-50 to-white py-8">
-      <div className="w-full max-w-4xl px-4">
+    <main className="min-h-dvh flex items-center justify-center bg-linear-to-br from-purple-100 via-purple-50 to-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-4xl mx-auto">
         <GameClient phrases={FRASES_FAMOSAS_BR} />
       </div>
     </main>

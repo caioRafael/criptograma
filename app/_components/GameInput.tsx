@@ -9,8 +9,16 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
     // Se não está visível mas foi preenchida pelo usuário, mostra o valor preenchido
     const value = visible ? letter : (letterValues[letter] || '')
     const [inputStatus, setInputStatus] = useState<'correct' | 'incorrect' | 'default'>('default')
+    const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
+        // detecta mobile no cliente para tratar comportamento do teclado virtual
+        try {
+            const ua = navigator.userAgent || ''
+            setIsMobile(/Mobi|Android|iPhone|iPad|iPod|Phone/i.test(ua) || ('ontouchstart' in window))
+        } catch (e) {
+            setIsMobile(false)
+        }
         if (visible) {
             setInputStatus('correct')
         } else if (!value || value === '') {
@@ -36,6 +44,9 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
         <input 
             type="text" 
             maxLength={1}
+            inputMode="text"
+            autoComplete="off"
+            enterKeyHint="done"
             className={`
                 w-12 h-12 
                 text-center 
@@ -75,7 +86,8 @@ export function GameInput({ letter, visible, wordIndex, letterIndex }: { letter:
                 // Seleciona o texto quando o campo recebe foco para facilitar substituição
                 e.target.select()
             }}
-            disabled={inputStatus === 'correct' || visible}
+            // Não desabilita no mobile ao marcar como 'correct' para evitar que o teclado virtual feche.
+            disabled={visible || (inputStatus === 'correct' && !isMobile)}
             placeholder=""
         />
         <span className="text-xs font-semibold text-gray-600 min-h-[16px] flex items-center justify-center">
